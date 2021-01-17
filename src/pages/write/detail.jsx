@@ -4,7 +4,7 @@ import {
     List,
 
 } from 'antd';
-import './evaluate.less'
+import './write.less'
 
 import {ArrowLeftOutlined} from "@ant-design/icons";
 import  LinkButton from '../../components/link-button';

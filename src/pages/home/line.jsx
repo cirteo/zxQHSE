@@ -13,82 +13,82 @@ export default class Line extends React.Component {
         const data = [
             {
                 month: "Jan",
-                a: 7.0,
-                b: 3.9,
-                c: 5.9
+                管理层: 7,
+                员工: 39,
+                所有用户: 59
             },
             {
                 month: "Feb",
-                a: 6.9,
-                b: 4.2,
-                c: 1.9
+                管理层: 6,
+                员工: 42,
+                所有用户: 59
             },
             {
                 month: "Mar",
-                a: 9.5,
-                b: 5.7,
-                c: 3.9
+                管理层: 9,
+                员工: 50,
+                所有用户: 69
             },
             {
                 month: "Apr",
-                a: 14.5,
-                b: 8.5,
-                c: 5.5
+                管理层: 14,
+                员工: 60,
+                所有用户: 85
             },
             {
                 month: "May",
-                a: 18.4,
-                b: 11.9,
-                c: 8.9
+                管理层: 4,
+                员工: 95,
+                所有用户: 129
             },
             {
                 month: "Jun",
-                a: 21.5,
-                b: 15.2,
-                c: 10.0
+                管理层: 5,
+                员工: 122,
+                所有用户: 140
             },
             {
                 month: "Jul",
-                a: 25.2,
-                b: 17.0,
-                c: 12.9
+                管理层: 2,
+                员工: 150,
+                所有用户: 162
             },
             {
                 month: "Aug",
-                a: 26.5,
-                b: 16.6,
-                c: 15.9
+                管理层: 5,
+                员工: 136,
+                所有用户: 159
             },
             {
                 month: "Sep",
-                a: 23.3,
-                b: 14.2,
-                c: 20.7
+                管理层: 3,
+                员工: 102,
+                所有用户: 147
             },
             {
                 month: "Oct",
-                a: 18.3,
-                b: 10.3,
-                c: 25.9
+                管理层: 8,
+                员工: 103,
+                所有用户: 129
             },
             {
                 month: "Nov",
-                a: 13.9,
-                b: 6.6,
-                c: 30.9
+                管理层: 9,
+                员工: 66,
+                所有用户: 109
             },
             {
                 month: "Dec",
-                a: 9.6,
-                b: 4.8,
-                c: 35.9
+                管理层: 5,
+                员工: 48,
+                所有用户: 70
             }
         ]
         const ds = new DataSet()
         const dv = ds.createView().source(data)
         dv.transform({
             type: "fold",
-            fields: ["a", "b", "c"],
+            fields: ["管理层", "员工", "所有用户"],
 // 展开字段集
             key: "city",
 // key 字段
@@ -101,13 +101,16 @@ export default class Line extends React.Component {
         }
         return (
             <div style={{float: 'right', width: 700, height: 300}}>
+                <div>
+                    <h3>活跃用户</h3>
+                </div>
                 <Chart height={250} data={dv} scale={cols} forceFit>
                     <Legend/>
                     <Axis name="month"/>
                     <Axis
                         name="temperature"
                         label={{
-                            formatter: val => `${val}万个`
+                            formatter: val => `${val}位`
                         }}
                     />
                     <Tooltip

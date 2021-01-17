@@ -1,54 +1,53 @@
 import React,{Component} from 'react';
 import PropTypes from 'prop-types';
 import {Tree,Input,Form} from 'antd';
-import menuList from '../../config/menuConfig';
-
 const Item =Form.Item;
-export default class AuthForm extends Component{
+export default class PublishForm extends Component{
     static propTypes={
-        role:PropTypes.object
+        role:PropTypes.object,
+        department:PropTypes.array
     }
+
+
 
     constructor(props){
             super(props);
-            const {menus}=this.props.role;
+
             this.state={
-                checkedKeys:menus,
+                checkedKeys:'',
+                evaluationsName:''
             }
     }
 
      onCheck = checkedKeys=> {
-       this.setState({checkedKeys})
-         console.log("选择的",this.state.checkedKeys);
+       this.setState({checkedKeys},() => {
+           console.log('加载完成')
+
+       })
+
     };
 
     //为父组件提供最新的menus
-    getMenus=()=>this.state.checkedKeys;
-    /*
-    最新传入的role来更新checkedKeys的状态
-    当前组件接受到新的属性的时候自动调用
-    */
-    componentWillReceiveProps(nextProps,nextContent){
-        const menus=nextProps.role.menus;
-        this.setState({
-            checkedKeys: menus
-        })
-    }
+    getDepartment=()=>this.state.checkedKeys;
     render(){
-        const {role}=this.props;
         const formItemLayout = {
             labelCol:{span:4},
             wrapperCol:{span:15},
         }
+        const departments=this.props.department;
         return (
             <div>
-                <Item {...formItemLayout} label={'角色名称'}>
-                    <Input value={role.name} disabled/>
+                <Item {...formItemLayout} label={'量化表名称'}>
+                    <Input
+                        onChange={event=>{
+                            this.setState({evaluationsName:event.target.value});
+                        }}/>
                 </Item>
+                <p>填报对象：</p>
                 <Tree
                     checkable
                     defaultExpantAll={true}
-                    treeData={menuList}
+                    treeData={departments}
                     checkedKeys={this.state.checkedKeys}
                     onCheck={this.onCheck}>
                 </Tree>

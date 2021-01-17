@@ -12,7 +12,6 @@ import {
 import {reqRoles,reqAddRole,reqUpdateRole} from '../../api';
 import AuthForm from './auth-form';
 import AddForm from './add-form';
-import memoryUtils from "../../utils/memoryUtils";
 import  {formateDate} from '../../utils/dateUtils';
 import {logout} from '../../redux/actions';
 
@@ -41,7 +40,7 @@ class Role extends Component{
             {
                 title:'创建时间',
                 dataIndex:'create_time',
-                render:(create_time)=>formateDate(create_time)
+                //render:(create_time)=>formateDate(create_time)
             },
             {
                 title:'授权时间',
@@ -65,8 +64,9 @@ class Role extends Component{
         }
     };
 
-    getRoles=async ()=>{
+    getRoles= async ()=>{
         const result=await reqRoles();
+        console.log(" reqRoles();",result);
         //请求成功
         if(result.status===0){
             const roles=result.data;
@@ -74,6 +74,7 @@ class Role extends Component{
                 roles
             })
         }
+
     };
 
     // 添加角色
@@ -90,19 +91,14 @@ class Role extends Component{
             this.form.current.resetFields();
                //请求添加
                 const result=await reqAddRole(roleName);
+                console.log(" reqAddRole(roleName);",result);
                //根据结果提示/更新显示
                 if(result.status===0){
                     //添加成功，显示最新的列表
                     // this.getRoles();
                     //新产生的角色
                     const role=result.data;
-                    //更新roles角色数组中的数据  是基于原有的状态数据基础上
-                    /*const roles=this.state.roles;
-                    const roles=[...this.state.roles];
-                    roles.push(role); //添加 roles.splice();//删除
-                    this.setState({
-                        roles
-                    })*/
+
                     this.setState(state=>({ //对象语法是函数语法的简洁写法
                         roles:[...state.roles,role]
                     }));
@@ -125,21 +121,19 @@ class Role extends Component{
         const role=this.state.role;
         //得到最新的menus
         const menus=this.auth.current.getMenus();
-        //设置选中 role的menu
-        role.menus=menus;
-        role.auth_time=Date.now();
+
+        role.menus=menus.toString();
+        role.auth_time= formateDate(Date.now());
          // role.auth_name=this.props.user.username;
         role.auth_name=this.props.user.username;
         //请求更新
         const result=await  reqUpdateRole(role);
+        console.log(" reqUpdateRole(role);",result)
         if(result.status===0){
 
             // this.getRoles();
             //如果当前更新的是自己角色权限，强制退出
-            if(role._id===this.props.user.role_id){
-                // memoryUtils.user={};
-                // storageUtils.removeUser();
-                // this.props.history.replace('/login');
+            if(role.name===this.props.user.type){
                 this.props.logout();
                 message.success('当前用户角色权限修改，请重新登录！');
             }
@@ -163,23 +157,24 @@ class Role extends Component{
 
     render(){
         const {roles,role,isShowAdd,isShowAuth}=this.state;
+
         const title=(
             <span>
                 <Button type='primary' onClick={()=>this.setState({isShowAdd:true})}>创建角色</Button> &nbsp;
-                <Button type='primary' disabled={!role._id} onClick={()=>this.setState({isShowAuth:true})}>设置角色权限</Button>
+                <Button type='primary' disabled={!role.id} onClick={()=>this.setState({isShowAuth:true})}>设置角色权限</Button>
             </span>
         )
         return (
             <Card title={title}>
             <Table
                 bordered
-                rowKey='_id'
+                rowKey='id'
                 dataSource={roles}
                 columns={this.cloumns}
                 pagination={{defaultPageSize:PAGE_SIZE, showQuickJumper:true}}
                 rowSelection={{
                     type:'radio',
-                    selectedRowKeys:[role._id],
+                    selectedRowKeys:[role.id],
                     onSelect:(role)=>{
                         this.setState({
                             role

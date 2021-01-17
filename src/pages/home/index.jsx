@@ -27,7 +27,7 @@ export default class Home extends Component{
             <div className='home'>
                 <Card
                     className="home-card"
-                    title="商品总量"
+                    title="访问总量"
                     extra={<QuestionCircleOutlined />}
                     style={{width: 250}}
                     headStyle={{color: 'rgba(0,0,0,.45)'}}
@@ -57,7 +57,7 @@ export default class Home extends Component{
                         <span className={isVisited ? "home-menu-active home-menu-visited" :'home-menu-visited'}
                                  onClick={this.handleChange(true)}>访问量</span>
                         <span className={isVisited ? "" : 'home-menu-active'}
-                              onClick={this.handleChange(false)}>销售量</span>
+                              onClick={this.handleChange(false)}>用户量</span>
                     </div>}
                     extra={<RangePicker
                         defaultValue={[moment('2019/01/01', dateFormat), moment('2019/06/01',
@@ -67,7 +67,7 @@ export default class Home extends Component{
                 >
                     <Card
                         className="home-table-left"
-                        title={isVisited ? '访问趋势' : '销售趋势'}
+                        title={isVisited ? '访问趋势' : '用户趋势'}
                         bodyStyle={{padding: 0, height: 275}}
                         extra={<ReloadOutlined />}>
                         <Bar/>

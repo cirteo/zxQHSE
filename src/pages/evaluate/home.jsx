@@ -2,14 +2,12 @@ import React,{Component} from 'react';
 import {
     Card,
     Select,
-   Input,
+    Input,
     Button,
-    Table,
-    message
-} from 'antd';
+    Table} from 'antd';
 import {PlusOutlined} from "@ant-design/icons";
 import LinkButton from '../../components/link-button';
-import {reqProducts,reqSearchProducts,reqUpdateCategorys,reqUpdateStatus} from '../../api';
+import {reqEvaluate,reqEvaluateTheme} from '../../api';
 import  {PAGE_SIZE} from "../../utils/constants";
 import memoryUtils from "../../utils/memoryUtils";
 
@@ -19,58 +17,66 @@ product的默认子路由组件
 
 const { Option } = Select;
 
-export default class ProductHome extends Component{
+export default class EvaluateHome extends Component{
     state={
         total:0,//商品的总数
-        products:[],  //商品的数组
+        products:[],  //evaluation的数组
         loading:false,
         searchName:'',//搜索的关键字
         searchType:'productName',//根据那个字段搜索
+        search:'evaluateDefault',//查找的类型
     }
 
     //初始化表格列 的函数
     initColumns=()=>{
         this.columns = [
             {
-                title: '商品名称',
-                dataIndex: 'name'
+                title: '主题',
+                dataIndex: 'theme'
             },
             {
-                title: '商品描述',
-                dataIndex: 'desc'
+                title: '项目',
+                dataIndex: 'project'
             },
             {
-                title: '价格',
-                dataIndex: 'price',
-                render:(price)=>'￥'+price  //当前指定了对应的属性，所以传入的是对应的属性值
+                title: '内容',
+                dataIndex: 'content'
             },
             {
-                width:100,
-                title: '状态',
-                //dataIndex: 'status',
-                render:(product)=>{
-                    const  {status,_id}=product;
-                    const newStatus = status===1 ? '2' : 1;
-                    return (
-                        <span>
-                            <Button
-                                type='primary'
-                                onClick={()=>this.updateStatus(_id, newStatus)}>
-                                {status===1?'下架':'上架'}</Button>
-                            <span>{status===1 ? '在售':'已下架'}</span>
-                        </span>
-                    )
-                }
+                title:'管理及运行要求',
+                dataIndex:'requirement'
             },
+            {
+                title:'量化说明',
+                dataIndex:'explains'
+            },
+            {
+                title:'量化项',
+                dataIndex:'term'
+            },{
+                title:'审核方式',
+                dataIndex:'method'
+            } ,{
+                title:'分数',
+                dataIndex:'score'
+            },
+            {
+                title:'计算公式',
+                dataIndex:'formula'
+            },
+            {
+                title: '量化项目',
+                dataIndex: 'term'
+            },
+
             {
                 width:100,
                 title: '操作',
-                render:(product)=>{
+                render:(evaluation)=>{
                     return(
                         <span>
-                            {/*将product对象使用state传递给目标路由组件*/}
-                            <LinkButton onClick={()=>this.showDetail(product)}>详情</LinkButton>
-                            <LinkButton onClick={()=>this.showUpdate(product)}>修改</LinkButton>
+
+                            <LinkButton onClick={()=>this.showUpdate(evaluation)}>修改</LinkButton>
                         </span>
                     )
                 }
@@ -78,87 +84,73 @@ export default class ProductHome extends Component{
         ];
     }
 
-    showDetail=(product)=>{
-        //缓存product对象====》给detail组件使用
-        memoryUtils.product=product;
-        this.props.history.push('/product/detail');
-    }
-    showUpdate=(product)=>{
-        memoryUtils.product=product;
-        this.props.history.push('/product/addupdate');
+
+    showUpdate=(evaluation)=>{
+        memoryUtils.evaluation=evaluation;
+        this.props.history.push('/evaluate/addupdate');
     }
 
     //获取指定页面的列表数据显示-------------搜索分页没有
-    getProducts=async (pageNum)=>{
-        this.pageNum=pageNum; //保存pageNum后面的方法可看见
-        const {searchType,searchName}=this.state;
+    getEvaluations=async ()=>{
+        const {search,searchName}=this.state;
+
         this.setState({  //显示loading
             loading:true
         })
         //如果搜索关键字有值，说明要进行搜索
         let result;
-        if(searchName){
-            result=await reqSearchProducts({pageNum, pageSize: PAGE_SIZE,searchName,searchType});
-        }else{ //一般分页请求
-            result=await reqProducts(pageNum,PAGE_SIZE);
+        console.log("search",search);
+        if(search!=="evaluateDefault"){
+            console.log("给的参数",searchName)
+            result=await reqEvaluateTheme(search,searchName);
+            console.log("reqEvaluateThem",result);
+        }else {
+            result=await reqEvaluate();
+            console.log("reqEvaluate()",result);
         }
+
+        console.log("返回 ",result)
 
         this.setState({
             loading:false
         })
         if(result.status===0){
             //取出分页数据，更新状态，显示分页列表
-            const {total,list}=result.data;
+            const data=result.data;
             this.setState({
-                total,
-                products:list
+
+                evaluations:data
             })
         }
     }
 
-
-    //更新指定商品的状态
-    // updateStatus=async (productID,status)=>{
-    //     // const result=await reqUpdateCategorys(productId,status);
-    //     const result=await reqUpdateStatus(productID,status);
-    //     if(result.status===0){
-    //         message.success('成功啦');  //这里存在一个问题--------------------点击更新状态后不能就在页面上显示改变的状态
-    //         console.log(this.pageNum)
-    //         this.getProducts(this.pageNum);
-    //     }
-    // }
-    // 更新指定商品的状态
-    updateStatus = async (productID, status) => {
-        const result = await reqUpdateStatus(productID, status);
-
-        if (result.status === 0) {
-            message.success('更新商品成功');
-            this.getProducts(this.pageNum);
-        }
-    };
 
     componentWillMount(){
         this.initColumns();
     }
 
     componentDidMount(){
-        this.getProducts(1);
+        this.getEvaluations();
     }
 
  render(){
-        const {products,total,loading,searchName,searchType}=this.state;
+        const {evaluations,total,loading,searchName,search}=this.state;
+        console.log("se",search);
 
      const title=(
          <span>
              <Select
-                 value={searchType}
+                 value={search}
                  style={{width:150}}
-                 onChange={(value)=>this.setState({searchType:value})}
+                 onChange={(value)=>this.setState({search:value})}
              >
-                 <Option value='productName'>按名称搜索</Option>
-                 <Option value='productDesc'>按描述搜索</Option>
+                 <Option value='evaluateDefault' >默认搜索</Option>
+                 <Option value='theme' >按主题搜索</Option>
+                 <Option value='project'>按项目搜索</Option>
+                 <Option value='content'>按内容搜索</Option>
              </Select>
              <Input
+                 disabled={search==='evaluateDefault'?true:false}
                  placeholder='关键字'
                  style={{width:150, margin:'0 15px'}}
                  value={searchName}
@@ -166,13 +158,13 @@ export default class ProductHome extends Component{
                      this.setState({searchName:event.target.value});
                  }}
              />
-             <Button type='primary' onClick={()=>{this.getProducts(1)}}>搜索</Button>
+             <Button type='primary' onClick={()=>{this.getEvaluations()}}>搜索</Button>
          </span>
      );
      const  extra=(
-         <Button type='primary' onClick={()=>{this.props.history.push('/product/addupdate')}}>
+         <Button type='primary' onClick={()=>{this.props.history.push('/evaluate/addupdate')}}>
              <PlusOutlined/>
-                添加商品
+                添加量化项
          </Button>
 
      )
@@ -181,17 +173,17 @@ export default class ProductHome extends Component{
          <Card title={title} extra={extra}>
 
              <Table
-                 rowKey='_id'
+                 rowKey='id'
                  bordered
                  loading={loading}
-                 dataSource={products}
+                 dataSource={evaluations}
                  columns={this.columns}
                  pagination={{
                      current:this.pageNum,
                      total,
                      defaultPageSize:PAGE_SIZE,
                      showQuickJumper:true,
-                     onChange:this.getProducts
+                     onChange:this.getEvaluations
                  }}
 
              />

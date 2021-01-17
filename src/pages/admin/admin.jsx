@@ -1,33 +1,32 @@
 import React,{Component} from 'react';
 import  {Redirect,Route,Switch} from 'react-router-dom';
-import { Layout,Menu, Breadcrumb  } from 'antd';
+import { Layout, } from 'antd';
 import  {connect} from 'react-redux';
 
 
 import LeftNav from '../../components/left-nav';
 import Header from '../../components/header';
 import Home from '../home';
-import  Category from "../category/category";
-import Product from "../product/product";
+
 import  Role from "../role/role";
 import  User from "../user/user";
-import Bar from "../charts/bar";
-import Line from "../charts/line";
-import Pie from "../charts/pie";
 import NotFound from '../not-found/not-found';
+import NotDevelopment from '../not-found/not-development';
+import Evaluate from "../evaluate/evaluate";
+import Publish from "../publish/home";
+import Write from "../write/home";
 
 /*
  后台管理的路由组件
  */
 
 const {Footer, Sider, Content } = Layout;
-const { SubMenu } = Menu
 class Admin extends Component{
  render(){
      //读取保存的用户信息-----------
      const user=this.props.user;
      //如果内存中没有存储user 当前没有登录
-     if(!user || !user._id){
+     if(!user || !user.id){
          //自动跳转到登录接界面  在render函数中用 Redirect
          return  <Redirect to='/login'/>
      }
@@ -42,13 +41,14 @@ class Admin extends Component{
                      <Switch>
                          <Redirect exact from='/' to='/home'/>
                          <Route path='/home' component={Home} />
-                         <Route path='/category' component={Category} />
-                         <Route path='/product' component={Product}/>
+                         <Route path='/evaluate' component={Evaluate}/>
+                         <Route path='/publish' component={Publish}/>
+                         <Route path='/write' component={Write}/>
+                         <Route path='/check' component={NotDevelopment}/>
+                         <Route path='/check/checking' component={NotDevelopment}/>
+                         <Route path='/check/problem' component={NotDevelopment}/>
                          <Route path='/role' component={Role}/>
                          <Route path='/user' component={User}/>
-                         <Route path='/charts/bar' component={Bar}/>
-                         <Route path='/charts/line' component={Line}/>
-                         <Route path='/charts/pie' component={Pie}/>
                          <Route  component={NotFound}/>
 
                      </Switch>

@@ -1,9 +1,8 @@
 import React,{Component} from 'react';
 import {Card,Button,Table,Modal,message} from 'antd';
-import  {formateDate} from '../../utils/dateUtils';
 import LinkButton from "../../components/link-button";
 import {PAGE_SIZE} from "../../utils/constants";
-import {reqAddOrUpdateUser, reqDeleteUsers, reqUsers} from "../../api";
+import {reqAddOrUpdateUser, reqDeleteUsers, reqRoles, reqUsers} from "../../api";
 import UsersForm from './user-form';
 
 /*
@@ -16,51 +15,58 @@ export default class User extends Component{
         isShow:false, ///标识是否显示初始框
     }
 
+
+    initRoleNames=async ()=>{
+        const result=await reqRoles();
+        console.log(" reqRoles();",result)
+        const roles=result.data;
+        let roleNames=roles.reduce((pre,role)=>{//==========?reduce啥意思啊？？？
+            pre[role.id]=role.name;
+            return pre;
+        },{});
+        var arr = [];
+        for (let i in roleNames) {
+            arr.push(roleNames[i]); //属性
+            //arr.push(obj[i]); //值
+        }
+
+        //保存起来
+        this.roleNames=arr;
+        this.setState({
+            roles
+        })
+    }
+
     initColumns=()=>{
-        this.columns=[
+        this.columns=[//----------------------------------------------------
+            {
+                title:'密码',
+                dataIndex:'password'
+            },
             {
                 title:'用户名',
                 dataIndex:'username'
             },
             {
-                title:'邮箱',
-                dataIndex:'email',
-            },
-            {
-                title:'电话',
-                dataIndex:'phone'
-            },
-            {
-                title:'注册时间',
-                dataIndex:'create_time',
-                render:formateDate
+                title:'账号',
+                dataIndex:'account',
             },
             {
                 title:'所属角色',
-                dataIndex:'role_id',
-                // render:(role_id)=>this.state.roles.find(role => role._id === role_id)
-                render:value=>this.roleNames[value]
+                dataIndex:'type',
+                 //render:value=>this.roleNames[value]
             },
             {
                 title:'操作',
                 render:(user)=>(
+
                     <span>
                        <LinkButton onClick={()=>this.showUpdate(user)}>修改</LinkButton>
-                       <LinkButton onClick={()=>this.deleteUser(user)}>删除</LinkButton>
+                       <LinkButton onClick={()=>{this.deleteUser(user)}}>删除</LinkButton>
                    </span>
                 )
             },
         ]
-    }
-
-    //根据role的数组，生成包含所有角色名的对象（属性名用角色id值）
-    initRoleNames=(roles)=>{
-        const roleNames=roles.reduce((pre,role)=>{//==========?reduce啥意思啊？？？
-            pre[role._id]=role.name;
-            return pre;
-        },{});
-        //保存起来
-        this.roleNames=roleNames;
     }
 
     //删除指定用户
@@ -68,7 +74,8 @@ export default class User extends Component{
         Modal.confirm({
             title:`确认删除${user.username}吗？`,
             onOk:async ()=>{
-                const result=await reqDeleteUsers(user._id);
+                const result=await reqDeleteUsers(user.id);
+                console.log("reqDeleteUsers()",result)
                 if(result.status===0){
                     message.success('删除用户成功！');
                     this.getUsers();
@@ -107,13 +114,14 @@ export default class User extends Component{
             this.form.current.resetFields();
             //如果是更新，就要给user指定_id属性
             if(this.user){
-                user._id=this.user._id;
+                user.id=this.user.id;
             }
             this.setState({
                 isShow:false
             })
-            //2.提交请求
             const result=await reqAddOrUpdateUser(user);
+            console.log("reqAddOrUpdateUser",result);
+            console.log("修改或者添加用户",result);
             if(result.status===0){
                 message.success(`${this.user?'修改':'添加'}用户成功`);
                 //3.更新列表显示
@@ -126,12 +134,12 @@ export default class User extends Component{
 
     getUsers=async ()=>{
         const result=await reqUsers();
+        console.log("reqUsers();",result);
         if(result.status===0){
-            const {users,roles}=result.data;
-            this.initRoleNames(roles);
+            const users=result.data;
+            this.initRoleNames();
             this.setState({
                 users,
-                roles
             })
         }
     };
@@ -145,7 +153,7 @@ export default class User extends Component{
     }
 
     render(){
-        const {users,isShow,roles}=this.state;
+        const {users,isShow,roles,}=this.state;
         const user=this.user||{};
         const title=<Button type={'primary'} onClick={this.showAddUser}>创建用户</Button>
         return (
@@ -153,14 +161,14 @@ export default class User extends Component{
                 <Card title={title}>
                     <Table
                         bordered
-                        rowKey='_id'
+                        rowKey='id'
                         dataSource={users}
                         columns={this.columns}
                         pagination={{defaultPageSize:PAGE_SIZE}}
                     />
 
                     <Modal
-                        title={user._id ? '修改用户' : '添加用户'}
+                        title={user._id ? '设置用户' : '设置用户'}
                         visible={isShow}
                         onOk={this.addOrUpdateUser}
                         onCancel={() => {
@@ -172,7 +180,7 @@ export default class User extends Component{
                             setForm={(form)=>{
                                 this.form=form;
                             }}
-                            roles={roles}
+                             roles={roles}
                             user={user}
                         />
                     </Modal>
@@ -185,4 +193,3 @@ export default class User extends Component{
 
 
 
-  

@@ -31,21 +31,20 @@ export const logout = () => {
 };
 
 // 登录的异步action
-export const login = (username, password) => {
+export const login = (account, password) => {
     return async dispatch => {
         // 1.执行ajax异步1请求
-        const result = await reqLogin(username, password);
-        const res = result;
+        const result = await reqLogin(account, password);
         // 2.如果成功，分发成功的同步action
-        if (res.status === 0) {
-            const user = res.data;
+        if (result.status === 0) {
+            const user = result.data;
             // 保存到local中
             storageUtils.saveUser(user);
             // 分发action
             dispatch(receiveUser(user))
         } else {
             // 如果失败，分发失败的同步action
-            const msg = res.msg;
+            const msg = result.msg;
             dispatch(showErrMsg(msg))
         }
     }

@@ -1,11 +1,9 @@
-import React,{Component} from 'react';
+import React, {Component} from 'react';
 
 import './index.less';
 import {reqWeather} from '../../api';
 import  menuList from '../../config/menuConfig'
 import {formateDate} from "../../utils/dateUtils";
-import memoryUtils from "../../utils/memoryUtils";
-import storageUtils from "../../utils/storageUtils";
 import  {withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import  LinkButton from '../link-button'
@@ -15,11 +13,11 @@ import  {Modal} from 'antd';
 /*
 左侧导航栏
  */
- class Header extends React.Component{
+ class Header extends Component{
     //当前组件的状态
     state={
         currentTime:formateDate(Date.now()),//当前时间字符串
-        dayPictureUrl: '',//天气的图片url
+
         weather:''//天气的文本
 
     }
@@ -36,9 +34,9 @@ import  {Modal} from 'antd';
 
     getWeather=async  ()=>{
         //调用接口请求异步获取数据
-        const {dayPictureUrl,weather} = await reqWeather(110101)
+        const {weather} = await reqWeather(110101)
         //更新状态
-        this.setState({dayPictureUrl,weather})
+        this.setState({weather})
     }
 
     getTitle=()=>{
@@ -96,7 +94,7 @@ import  {Modal} from 'antd';
     }
 
  render(){
-        const {currentTime,dayPictureUrl,weather}=this.state;
+        const {currentTime,weather}=this.state;
         const user=this.props.user.username;
 
         //取出 所得到的需要显示的title
@@ -119,7 +117,7 @@ import  {Modal} from 'antd';
          </div>
      </div>
      )
-     }
+    }
 }
 
 export  default  connect(

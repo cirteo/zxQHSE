@@ -7,21 +7,55 @@ const menuList=[
         icon:"PieChartOutlined ",//图标名称
         isPublic:true //所有用户都可以看见
     },
+    // {
+    //     title: '商品',
+    //     key: '/products',
+    //     icon: 'appstore',
+    //
+    //     children:
+    //         [ // 子菜单列表
+    //             {
+    //                 title: '品类管理',
+    //                  key: '/category',
+    //                 icon: 'bars'
+    //             },
+    //             {
+    //                 title: '商品管理',
+    //                 key: '/product',
+    //                 icon: 'tool'
+    //             },
+    //         ]
+    // },
     {
-        title: '商品',
-        key: '/products',
+        title: '量化表录入',
+        key: '/evaluate',
+        icon: 'user'
+    },
+    {
+        title: '发布量化表',
+        key: '/publish',
+        icon: 'user'
+    },
+    {
+        title: '量化表填报',
+        key: '/write',
+        icon: 'user'
+    },
+    {
+        title: '量化表审核',
+        key: '/check',
         icon: 'appstore',
 
         children:
             [ // 子菜单列表
                 {
-                    title: '品类管理',
-                     key: '/category',
+                    title: '审核量化表',
+                    key: '/check/checking',
                     icon: 'bars'
                 },
                 {
-                    title: '商品管理',
-                    key: '/product',
+                    title: '未通过量化表',
+                    key: '/check/problem',
                     icon: 'tool'
                 },
             ]
@@ -32,32 +66,9 @@ const menuList=[
         icon: 'user'
     },
     {
-        title: '角色管理',
+        title: '权限管理',
         key: '/role',
         icon: 'safety',
-    },
-    {
-        title: '图形图表',
-        key: '/charts',
-        icon: 'area-chart',
-        children:
-            [
-                {
-                    title: '柱形图',
-                    key: '/charts/bar',
-                    icon: 'bar-chart'
-                },
-                {
-                    title: '折线图',
-                    key: '/charts/line',
-                    icon: 'line-chart'
-                },
-                {
-                    title: '饼图',
-                    key: '/charts/pie',
-                    icon: 'pie-chart'
-                },
-        ]
     },
 ]
 export default menuList

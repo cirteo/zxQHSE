@@ -24,12 +24,7 @@ export  default class PicturesWall extends React.Component {
         previewImage: '',//大图url
         previewTitle:'',
         fileList: [
-            // {
-            //     uid: '-1',  //每一个file有一个唯一的id 建议设置为负数，避免和内部id发生冲突
-            //     name: 'image.png', //图片文件名
-            //     status: 'done', //图片的状态： done  已上传图片  uploading 正在上传中 error  上传错误  removed  已删除
-            //     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png', //图片的地址
-            // },
+
         ],
     };
 

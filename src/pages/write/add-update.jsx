@@ -4,25 +4,18 @@ import {
     Card,
     Form,
     Input,
-    Cascader, //级联列表
-    Upload,  //上传
     Button,
     message,
     Select
 } from 'antd';
-import PicturesWall from './pictures-wall';
 import  LinkButton from '../../components/link-button';
 import {ArrowLeftOutlined} from "@ant-design/icons";
-import {reqCategorys,reqAddOrUpdateEvaluate} from '../../api';
+import {reqAddOrUpdateEvaluate} from '../../api';
 import memoryUtils from "../../utils/memoryUtils";
-import RichTextEditor  from  './rich-text-editor';
 
 
 const {Item}=Form;
 const { TextArea } = Input;
-
-
-const { Option } = Select;
 
 export default class EvaluateAddUpdate extends Component{
     forRef=React.createRef();
@@ -37,10 +30,6 @@ export default class EvaluateAddUpdate extends Component{
         this.editor=React.createRef();
     }
 
-
-    handleChange=(value)=> {
-        console.log(`selected ${value}`);
-    }
     //表单验证
     submit=()=>{
         //进行表单验证，如果通过，才发送请求
@@ -48,18 +37,14 @@ export default class EvaluateAddUpdate extends Component{
             //1.收集数据 并封装为promise对象
             const {theme,project,content,requirement,explains,term,method,score,formula,haveScore,description}=value;
 
-
             //封装成product
             const evaluation={theme,project,content,requirement,explains,term,method,score,formula,haveScore,description};
-
             //如果是更新，就需要添加_id;
             if(this.isUpdate){
-                console.log("选择的id",this.evaluation.id);
                 evaluation.haveScore='';
                 evaluation.description='';
                 evaluation.id=this.evaluation.id;
             }
-            console.log("zhegs hi ds",evaluation);
             //2.调用接口请求函数去添加、更新
             const result=await reqAddOrUpdateEvaluate(evaluation);
             //3.根据结果提示
@@ -69,9 +54,7 @@ export default class EvaluateAddUpdate extends Component{
             }else{
                 message.error(`${this.isUpdate? '更新':'添加'}量化项失败！`)
             }
-
         })
-
     };
 
     componentDidMount() {
@@ -92,10 +75,8 @@ export default class EvaluateAddUpdate extends Component{
         memoryUtils.evaluation={};
     }
 
-
     render(){
         const {isUpdate,evaluation}=this;
-        const {theme,project,content,requirement,explains,term,method,score,formula,haveScore,description}=evaluation;
         //接收级联分类ID的数组
         const title=(
             <span>
@@ -215,17 +196,6 @@ export default class EvaluateAddUpdate extends Component{
                               }
                           ]}>
                         <Input placeholder='请输入审核方式'/>
-                        {/*<Select*/}
-                            {/*mode="multiple"*/}
-                            {/*allowClear*/}
-                            {/*style={{ width: '100%' }}*/}
-                            {/*placeholder="请选择审核方式"*/}
-                            {/*defaultValue={['查询资料']}*/}
-                            {/*onChange={this.handleChange}*/}
-                        {/*>*/}
-                            {/*<Option key={"source"}>查询资料</Option>*/}
-                            {/*<Option key={"interview"}>访谈</Option>*/}
-                        {/*</Select>*/}
                     </Item>
 
                     <Item label='分数'
@@ -253,37 +223,6 @@ export default class EvaluateAddUpdate extends Component{
                           ]}>
                         <Input placeholder='请输入计算公式'/>
                     </Item>
-
-                    {/*<Item label='得分'*/}
-                          {/*initialValue={evaluation.haveScore}*/}
-                          {/*name={'haveScore'}*/}
-                          {/*rules={[*/}
-                              {/*{*/}
-                                  {/*required:true,*/}
-                                  {/*whitespace:true,*/}
-                                  {/*message:'请输入得分！'*/}
-                              {/*}*/}
-                          {/*]}>*/}
-                        {/*<Input placeholder='请输入得分'/>*/}
-                    {/*</Item>*/}
-
-                    {/*<Item label='可能存在的问题描述'*/}
-                          {/*initialValue={evaluation.description}*/}
-                          {/*name={'description'}*/}
-                          {/*rules={[*/}
-                              {/*{*/}
-                                  {/*required:true,*/}
-                                  {/*whitespace:true,*/}
-                                  {/*message:'请输入可能存在的问题描述！'*/}
-                              {/*}*/}
-                          {/*]}>*/}
-                        {/*<Input placeholder='请输入可能存在的问题描述'/>*/}
-                    {/*</Item>*/}
-
-
-
-
-
                     <Item >
                         <Button type='primary'  htmlType="submit" onClick={this.submit}>提交</Button>
                     </Item>

@@ -19,7 +19,7 @@ export default class UsersForm extends Component{
     }
 
     render(){
-        const {roles,user}=this.props;
+        const {user,roles}=this.props;
         //指定Item布局的配置对象
         const formItemLayout={
             labelCol:{span:4},  //设置左侧label的宽度
@@ -28,45 +28,48 @@ export default class UsersForm extends Component{
         return (
             <Form {... formItemLayout} ref={this.formRef} >
                 <Item
-                    label='用户名'
-                    name='username'
-                    initialValue={user.username}
-                    rules={[{required: true, whitespace: true, message: '请输入用户名!'}]}>
-                    <Input placeholder={'请输入用户名'}/>
-                </Item>
-                {
-                    user._id ? null:(
-                        <Item
-                            label='密码'
-                            name='password'
-                            initialValue={user.password}
-                            rules={[{required: true, whitespace: true, message: '请输入密码!'}]}>
-                            <Input type={'password'} placeholder={'请输入密码'}/>
-                        </Item>
-                    )
-                }
+                label='用户名'
+                name='username'
+                initialValue={user.username}
+                rules={[{required: true, whitespace: true, message: '请输入用户名!'}]}>
+                <Input placeholder={'请输入用户名'}/>
+            </Item>
                 <Item
-                    label='手机号'
-                    name='phone'
-                    initialValue={user.phone}
-                    rules={[{required: true, whitespace: true, message: '请输入手机号!'}]}>
-                    <Input placeholder={'请输入手机号'}/>
+                    label='账号'
+                    name='account'
+                    initialValue={user.account}
+                    rules={[{required: true, whitespace: true, message: '请输入账号!'}]}>
+                    <Input placeholder={'请输入账号'}/>
                 </Item>
                 <Item
-                    label='邮箱'
-                    name='email'
-                    initialValue={user.email}
-                    rules={[{required: true, whitespace: true, message: '请输入邮箱!'}]}>
-                    <Input placeholder={'请输入邮箱'}/>
+                    label='密码'
+                    name='password'
+                    initialValue={user.password}
+                    rules={[{required: true, whitespace: true, message: '请输入密码!'}]}>
+                    <Input type={'password'} placeholder={'请输入密码'}/>
                 </Item>
+
                 <Item
                     label='角色'
-                    name='role_id'
-                    initialValue={user.role_id}
-                    rules={[{required: true, whitespace: true, message: '请输入角色名!'}]}>
+                    name='type'
+                    initialValue={user.type}
+                    rules={[
+                        {
+                            type: "string",
+                            required: true,
+                            message: '编码项目至少一项',
+                            trigger: 'change',
+                            transform(value) {
+                                var base
+                                if(value){
+                                    base =""+value
+                                }
+                                return base
+                            }
+                        }]}>
                     <Select >
                         {
-                            roles.map(role=><Option key={role._id} value={role._id}>{role.name}</Option>)
+                            roles.map(role=><Option key={role.id} value={role.name}>{role.name}</Option>)
                         }
                     </Select>
                 </Item>

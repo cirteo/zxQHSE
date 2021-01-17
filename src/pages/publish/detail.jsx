@@ -22,32 +22,7 @@ export default class EvaluateDetail extends Component{
         cName2:'',  //二级分类名称
     }
 
-  /* async componentDidMount(){
-        //得到当前商品的分类ID
-        const {pCategoryId,categoryId}=memoryUtils.product;
-        if(pCategoryId===0){  //一级分类下的商品
-           const result=await reqCategory(categoryId);
-           const cName1=result.data.name;
-           this.setState({cName1})
-        }else {  //二级分类下的商品
 
-            //通过多个await请求：后面的一个请求是在前一个请求成功之后才发送
-            // const result1=await reqCategory(pCategoryId);
-            // const result2=await reqCategory(categoryId);
-            // const cName1=result1.data.name;
-            // const cName2=result2.data.name;
-
-            // 一次发送多个请求，只有都成功了才正常处理
-            const results=await Promise.all([reqCategory(pCategoryId),reqCategory(categoryId)]);
-            const cName1=results[0].data.name;
-            const cName2=results[1].data.name;
-
-
-            this.setState({
-                cName1,cName2
-            })
-        }
-    }*/
     async componentDidMount() {
         const {pCategoryId, categoryId} = memoryUtils.product;
         if (pCategoryId === '0') { //一级分类下的商品
@@ -55,12 +30,6 @@ export default class EvaluateDetail extends Component{
             const cName1 = result.data.name;
             this.setState({cName1})
         } else {   //二级分类下的商品
-
-            // // 一次性发送多个请求，只有都成功了，才正常处理，问题不大，效率偏低
-            // const result1 = await reqCategory(pCategoryId).data;  //获取一级分类列表
-            // const result2 = await reqCategory(categoryId).data;  // 获取二级分类列表
-            // const cName1 = result1.data.name;
-            // const cName2 = result2.data.name;
 
             // 一次性发送多个请求，只有都成功了，才正常处理
             const results=await Promise.all([reqCategory(pCategoryId),reqCategory(categoryId)]);

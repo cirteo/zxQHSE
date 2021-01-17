@@ -19,6 +19,7 @@ export default class AuthForm extends Component{
 
      onCheck = checkedKeys=> {
        this.setState({checkedKeys})
+         console.log("选择的",this.state.checkedKeys);
     };
 
     //为父组件提供最新的menus

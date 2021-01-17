@@ -1,36 +1,43 @@
 import React,{Component} from 'react';
 import {
     Card,
-    Select,
-   Input,
     Button,
     Table,
-    message
+    message,
+     Modal
 } from 'antd';
-import {PlusOutlined} from "@ant-design/icons";
-import LinkButton from '../../components/link-button';
-import {reqProducts,reqSearchProducts,reqUpdateCategorys,reqUpdateStatus,reqEvaluate,reqEvaluateTheme} from '../../api';
-import  {PAGE_SIZE} from "../../utils/constants";
+import {UpCircleOutlined } from "@ant-design/icons";
+import {reqPublish,reqEvaluate} from '../../api';
 import memoryUtils from "../../utils/memoryUtils";
+import  PublishForm from "./publish-form";
+import  PublishedForm  from "./published-form";
 
-/*
-product的默认子路由组件
- */
-
-const { Option } = Select;
-
-export default class EvaluateHome extends Component{
-    state={
-        total:0,//商品的总数
-        products:[],  //evaluation的数组
-        loading:false,
-        searchName:'',//搜索的关键字
-        searchType:'productName',//根据那个字段搜索
-        search:'evaluateDefault',//查找的类型
+export default class Publish extends Component {
+    state = {
+        loading: false,
+        searchName: '',//搜索的关键字
+        searchType: 'productName',//根据那个字段搜索
+        search: 'evaluateDefault',//查找的类型
+        options: [],
+        evaluations: [],
+        evaluate: {},
+        department: [],
+        id: [],
+        id_single: {},
+        selectedRowKeys: [], // Check here to configure the default column
+        isShowPublish: false,
+        isShow: false,
+        role: {}
     }
 
+    constructor(props) {
+        super(props);
+        this.auth = React.createRef();
+    };
+
     //初始化表格列 的函数
-    initColumns=()=>{
+    initColumns = () => {
+
         this.columns = [
             {
                 title: '主题',
@@ -45,191 +52,268 @@ export default class EvaluateHome extends Component{
                 dataIndex: 'content'
             },
             {
-                title:'管理及运行要求',
-                dataIndex:'requirement'
+                title: '管理及运行要求',
+                dataIndex: 'requirement'
             },
             {
-                title:'量化说明',
-                dataIndex:'explains'
+                title: '量化说明',
+                dataIndex: 'explains'
             },
             {
-                title:'量化项',
-                dataIndex:'term'
-            },{
-                title:'审核方式',
-                dataIndex:'method'
-            } ,{
-                title:'分数',
-                dataIndex:'score'
-            },
-            {
-                title:'计算公式',
-                dataIndex:'formula'
-            },
-            // {
-            //     title:'存在问题描述',
-            //     dataIndex:'description'
-            // },
-
-
-            {
-                title: '量化项目',
+                title: '量化项',
                 dataIndex: 'term'
             },
-
             {
-                width:100,
-                title: '操作',
-                render:(evaluation)=>{
-                    return(
-                        <span>
-                            {/*将evaluation对象使用state传递给目标路由组件*/}
-                            {/*<LinkButton onClick={()=>this.showDetail(eval)}>详情</LinkButton>*/}
-                            <LinkButton onClick={()=>this.showUpdate(evaluation)}>修改</LinkButton>
-                        </span>
-                    )
-                }
+                title: '审核方式',
+                dataIndex: 'method'
+            },
+            {
+                title: '分数',
+                dataIndex: 'score'
+            },
+            {
+                title: '计算公式',
+                dataIndex: 'formula'
             },
         ];
     }
 
-    showDetail=(product)=>{
+    onchange = (e) => {
+
+        const checked = e.target.checked;
+        const checkValue = e.target.value;
+
+        let optionIndex;
+        if (checked) {
+            this.setState(state => ({ //对象语法是函数语法的简洁写法
+                options: [...state.options, "11"]
+            }));
+        } else {
+            let options = this.state.options;
+            options.forEach(function (val, index,) {
+                if (val === checkValue) {
+                    optionIndex = index;
+                }
+            });
+            options.splice(options.findIndex(item => item.id === optionIndex), 0);
+            this.setState(state => ({ //对象语法是函数语法的简洁写法
+                options: options
+            }));
+        }
+
+    }
+
+    publish = async () => {
+        let callbackId = [];
+        const evaluateDepartment = this.auth.current.getDepartment();
+        const evaluationsName = this.auth.current.state.evaluationsName;
+        const autherAccount = memoryUtils.user.account;
+
+        const {selectedRowKeys, id} = this.state;
+        const idarray = id;
+        for (let i = 0; i < idarray.length; i++) {
+            for (let j = 0; j < selectedRowKeys.length; j++) {
+                if (idarray[i].key === selectedRowKeys[j]) {
+                    callbackId.push(idarray[i]._id);
+                }
+            }
+        }
+
+        let form = {};
+        form.auth = autherAccount;
+        form.department = evaluateDepartment.toString();
+        form.deliveryTerm = callbackId.toString();
+        form.deliveryFormName = evaluationsName;
+        const result = await reqPublish(form);
+        console.log("reqPublish(form);",result)
+        if (result.status === 0) {
+            message.success("发布量化表成功！");
+            this.setState({
+                isShowPublish: false,
+            })
+        } else {
+            message.error("发布量化表失败！");
+        }
+
+    }
+
+
+    showDetail = (product) => {
         //缓存product对象====》给detail组件使用
-        memoryUtils.product=product;
+        memoryUtils.product = product;
         this.props.history.push('/product/detail');
     }
-    showUpdate=(evaluation)=>{
-        memoryUtils.evaluation=evaluation;
+    showUpdate = (evaluation) => {
+        memoryUtils.evaluation = evaluation;
         this.props.history.push('/evaluate/addupdate');
     }
 
     //获取指定页面的列表数据显示-------------搜索分页没有
-    /*getEvaluations=async (pageNum)=>{
-        this.pageNum=pageNum; //保存pageNum后面的方法可看见
-        const {searchType,searchName}=this.state;
+    getEvaluations = async () => {
         this.setState({  //显示loading
-            loading:true
+            loading: true
         })
         //如果搜索关键字有值，说明要进行搜索
         let result;
-        if(searchName){
-            result=await reqSearchProducts({pageNum, pageSize: PAGE_SIZE,searchName,searchType});
-        }else{ //一般分页请求
-            // result=await reqProducts(pageNum,PAGE_SIZE);
-            result=await reqEvaluate();
-            console.log("返回 ",result)
-        }
-
+        result = await reqEvaluate();
+        console.log("t reqEvaluate();",result)
         this.setState({
-            loading:false
+            loading: false
         })
-        if(result.status===0){
+        this.ids = [];
+
+        if (result.status === 0) {
             //取出分页数据，更新状态，显示分页列表
-            const {total,list}=result.data;
+            const evaluations = result.data;
+            const departments = result.department;
+            const depat = [];
+            for (let i = 0; i < departments.length; i++) {
+                let dep = {};
+                dep.title = departments[i];
+                dep.key = departments[i];
+                depat[i] = dep;
+            }
+            memoryUtils.departments = depat;
+
+            for (let i = 0; i < evaluations.length; i++) {
+                evaluations[i].key = i;
+                let id_single = {};
+                id_single._id = evaluations[i].id;
+                id_single.key = i;
+
+                this.ids[i] = id_single;
+
+
+            }
             this.setState({
-                total,
-                products:list
-            })
-        }
-    }*/
-
-    //获取指定页面的列表数据显示-------------搜索分页没有
-    getEvaluations=async ()=>{
-        const {search,searchName}=this.state;
-
-        this.setState({  //显示loading
-            loading:true
-        })
-        //如果搜索关键字有值，说明要进行搜索
-        let result;
-        console.log("search",search);
-        if(search!="evaluateDefault"){
-            console.log("给的参数",searchName)
-            result=await reqEvaluateTheme(search,searchName);
-        }else {
-            result=await reqEvaluate();
-        }
-
-        console.log("返回 ",result)
-
-        this.setState({
-            loading:false
-        })
-        if(result.status===0){
-            //取出分页数据，更新状态，显示分页列表
-            const data=result.data;
-            this.setState({
-
-                evaluations:data
+                evaluations,
+                id: this.ids,
+                department: depat
             })
         }
     }
+    onSelectChange = selectedRowKeys => {
+        this.setState({selectedRowKeys});
+    };
 
 
-    componentWillMount(){
-        this.initColumns();
-    }
-
-    componentDidMount(){
+    componentWillMount() {
         this.getEvaluations();
+        this.initColumns();
+
     }
 
- render(){
-        const {evaluations,total,loading,searchName,search}=this.state;
-        console.log("se",search);
+    componentDidMount() {
 
-     const title=(
-         <span>
-             <Select
-                 value={search}
-                 style={{width:150}}
-               //  defaultValue={'evaluateTheme'}
-                 onChange={(value)=>this.setState({search:value})}
-             >
-                 <Option value='evaluateDefault' >默认搜索</Option>
-                 <Option value='theme' >按主题搜索</Option>
-                 <Option value='project'>按项目搜索</Option>
-                 <Option value='content'>按内容搜索</Option>
-             </Select>
-             <Input
-                 disabled={search=='evaluateDefault'?true:false}
-                 placeholder='关键字'
-                 style={{width:150, margin:'0 15px'}}
-                 value={searchName}
-                 onChange={event=>{
-                     this.setState({searchName:event.target.value});
-                 }}
-             />
-             <Button type='primary' onClick={()=>{this.getEvaluations()}}>搜索</Button>
+
+    }
+
+    render() {
+        const {evaluations, role, isShowPublish, isShow,department, selectedRowKeys} = this.state;
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: this.onSelectChange,
+            selections: [
+                Table.SELECTION_ALL,
+                Table.SELECTION_INVERT,
+                {
+                    key: 'odd',
+                    text: 'Select Odd Row',
+                    onSelect: changableRowKeys => {
+                        let newSelectedRowKeys = [];
+
+
+                        newSelectedRowKeys = changableRowKeys.filter((key, index) => {
+                            if (index % 2 !== 0) {
+                                return false;
+                            }
+                            return true;
+                        });
+
+                        this.setState({selectedRowKeys: newSelectedRowKeys});
+                    },
+                },
+                {
+                    key: 'even',
+                    text: 'Select Even Row',
+                    onSelect: changableRowKeys => {
+                        let newSelectedRowKeys = [];
+                        newSelectedRowKeys = changableRowKeys.filter((key, index) => {
+                            if (index % 2 !== 0) {
+                                return true;
+                            }
+                            return false;
+                        });
+                        this.setState({selectedRowKeys: newSelectedRowKeys});
+                    },
+                },
+            ],
+
+        };
+        this.data = [];
+
+        const title = (
+            <span>
+
+             <Button type='primary' onClick={() => this.setState({isShow: true})}>查看已发布的量化表</Button>
+                &nbsp; &nbsp; &nbsp; &nbsp;
+                <Button type='primary' onClick={
+                    () => {
+                        if (selectedRowKeys.length === 0) {
+                            message.warning("请选择发布项！")
+                        } else {
+                            this.setState({isShowPublish: true})
+                        }
+                    }
+
+                }>
+                <UpCircleOutlined/>
+                发布量化表
+            </Button>
          </span>
-     );
-     const  extra=(
-         <Button type='primary' onClick={()=>{this.props.history.push('/evaluate/addupdate')}}>
-             <PlusOutlined/>
-                添加量化项
-         </Button>
+        );
+        return (
+            <Card title={title}>
 
-     )
+                <Table rowSelection={rowSelection} columns={this.columns} dataSource={evaluations}/>
+                <Modal
+                    title="设置表名和填报对象"
+                    visible={isShowPublish}
+                    onOk={this.publish}
+                    onCancel={
+                        () => {
+                            this.setState({isShowPublish: false});
+                        }
+                    }
+                >
+                    < PublishForm
+                        role={role}
+                        department={department}
+                        ref={this.auth}
+                    />
 
-         return (
-         <Card title={title} extra={extra}>
+                </Modal>
+                <Modal width={800}
+                       title="已发布的量化表"
+                       visible={isShow}
+                       onOk={() => {
+                           this.setState({isShow: false});
+                       }}
+                       onCancel={
+                           () => {
+                               this.setState({isShow: false});
+                           }
+                       }
+                >
+                    < PublishedForm
+                        role={role}
+                        department={department}
+                        ref={this.auth}
+                    />
 
-             <Table
-                 rowKey='id'
-                 bordered
-                 loading={loading}
-                 dataSource={evaluations}
-                 columns={this.columns}
-                 pagination={{
-                     current:this.pageNum,
-                     total,
-                     defaultPageSize:PAGE_SIZE,
-                     showQuickJumper:true,
-                     onChange:this.getEvaluations
-                 }}
+                </Modal>
+            </Card>
 
-             />
-         </Card>
-         )
-     }
+        )
+    }
 }
